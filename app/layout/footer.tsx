@@ -51,7 +51,7 @@ const Footer = () => {
     // Add your navigation logic here
   };
 
-  const handleSocialClick = (platform:any) => {
+  const handleSocialClick = (platform: string) => {
     console.log(`${platform} clicked`);
     if(platform === "Instagram"){
       window.open("https://www.Instagram.com/crux.creations", "_blank")

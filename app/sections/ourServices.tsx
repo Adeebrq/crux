@@ -1,9 +1,17 @@
 "use client"
 
-import React, { Suspense, lazy } from "react";
+import React, { Suspense } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+
+declare global {
+  interface Window {
+    TEMPORARILY_DISABLE_TABS?: boolean;
+    NAVIGATION_IN_PROGRESS?: boolean;
+    FORCE_DISABLE_SCROLL_LOCK?: boolean;
+  }
+}
 
 interface OptimizedImageProps {
   src: string;
@@ -24,12 +32,10 @@ interface ServiceTab {
   images?: string[];
 }
 
-
 const VideoCarousel = dynamic(() => import("./Videos"), {
   loading: () => <div className="animate-pulse bg-gray-900 h-64 rounded-lg"></div>,
   ssr: false
 });
-
 
 const GRADIENT_BG = "bg-gradient-to-br from-[#3c1700] via-[#220d00] to-[#000000]";
 const BUTTON_GRADIENT = "bg-gradient-to-b from-[#e47143] to-[#e9915f]";
@@ -40,7 +46,7 @@ const handleContactNavigation = () => {
   console.log("🎯 CONTACT NAVIGATION - FORCE UNLOCK ALL RESTRICTIONS");
   
   // Set flags
-  Object.assign(window as any, {
+  Object.assign(window, {
     TEMPORARILY_DISABLE_TABS: true,
     NAVIGATION_IN_PROGRESS: true,
     FORCE_DISABLE_SCROLL_LOCK: true
@@ -65,8 +71,8 @@ const handleContactNavigation = () => {
   }, 50);
   
   // Cleanup
-  setTimeout(() => { (window as any).NAVIGATION_IN_PROGRESS = false; }, 3000);
-  setTimeout(() => { (window as any).TEMPORARILY_DISABLE_TABS = false; }, 5000);
+  setTimeout(() => { window.NAVIGATION_IN_PROGRESS = false; }, 3000);
+  setTimeout(() => { window.TEMPORARILY_DISABLE_TABS = false; }, 5000);
 };
 
 // Optimized Image component

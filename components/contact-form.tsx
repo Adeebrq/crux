@@ -23,7 +23,7 @@ export default function ContactFromUi() {
     if (animationRef.current) {
       // Force reflow to ensure animation starts
       animationRef.current.style.animation = 'none';
-      animationRef.current.offsetHeight; // Trigger reflow
+      void animationRef.current.offsetHeight; // Trigger reflow
       animationRef.current.style.animation = 'glowSlide 2s linear infinite';
     }
   }, [animationKey]);

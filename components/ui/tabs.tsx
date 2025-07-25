@@ -9,13 +9,18 @@ import React from "react";
 type Tab = {
   title: string;
   value: string;
-  content?: string | React.ReactNode | any;
+  content?: string | React.ReactNode;
 };
+
+interface WindowWithFlags {
+  FORCE_DISABLE_SCROLL_LOCK?: boolean;
+  NAVIGATION_IN_PROGRESS?: boolean;
+  TEMPORARILY_DISABLE_TABS?: boolean;
+}
 
 export const Tabs = ({
   tabs: propTabs,
   containerClassName,
-  activeTabClassName,
   tabClassName,
   contentClassName,
 }: {
@@ -44,8 +49,8 @@ export const Tabs = ({
   const scrollPositionWhenLocked = useRef(0);
   const initialScrollY = useRef<number | null>(null);
 
-  const tabContentRefs = useRef<(React.RefObject<HTMLDivElement | null>)[]>(
-    propTabs.map(() => useRef<HTMLDivElement | null>(null))
+  const tabContentRefs = useRef<React.RefObject<HTMLDivElement | null>[]>(
+    propTabs.map(() => React.createRef<HTMLDivElement | null>())
   );
 
   const [isMobile, setIsMobile] = useState(false);
@@ -152,13 +157,14 @@ export const Tabs = ({
       }
     );
 
-    if (fadeInDivRef.current) {
-      observer.observe(fadeInDivRef.current);
+    const currentRef = fadeInDivRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (fadeInDivRef.current) {
-        observer.unobserve(fadeInDivRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [isMobile, isMobileInitialized, isUserInteracting]);
@@ -190,7 +196,7 @@ export const Tabs = ({
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      () => {
         // const entry = entries[0];
         // setIntersectionRatio(entry.intersectionRatio);
         // setIsFullyVisible(entry.intersectionRatio >= 0.3);
@@ -198,9 +204,10 @@ export const Tabs = ({
       { threshold: 0.99 }
     );
 
-    if (fadeInDivRef.current) observer.observe(fadeInDivRef.current);
+    const currentRef = fadeInDivRef.current;
+    if (currentRef) observer.observe(currentRef);
     return () => {
-      if (fadeInDivRef.current) observer.unobserve(fadeInDivRef.current);
+      if (currentRef) observer.unobserve(currentRef);
     };
   }, []);
 
@@ -210,7 +217,7 @@ export const Tabs = ({
     if (!isMobileInitialized || isMobile) return;
     
     // Check if navigation is forcing scroll unlock
-    if ((window as any).FORCE_DISABLE_SCROLL_LOCK) {
+    if ((window as unknown as WindowWithFlags).FORCE_DISABLE_SCROLL_LOCK) {
       console.log("🚫 FORCE_DISABLE_SCROLL_LOCK active, unlocking scroll");
       setIsScrollLocked(false);
       document.body.style.position = '';
@@ -243,7 +250,8 @@ export const Tabs = ({
       document.body.style.overflow = '';
       
       // Only restore scroll position if not in navigation mode
-      if (!(window as any).NAVIGATION_IN_PROGRESS && !(window as any).FORCE_DISABLE_SCROLL_LOCK) {
+      const windowWithFlags = window as unknown as WindowWithFlags;
+      if (!windowWithFlags.NAVIGATION_IN_PROGRESS && !windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
         requestAnimationFrame(() => {
           window.scrollTo(0, scrollTop);
         });
@@ -251,7 +259,8 @@ export const Tabs = ({
     }
 
     return () => {
-      if (!(window as any).FORCE_DISABLE_SCROLL_LOCK) {
+      const windowWithFlags = window as unknown as WindowWithFlags;
+      if (!windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.left = '';
@@ -344,9 +353,10 @@ export const Tabs = ({
       }
 
       // Enhanced navigation check - exit early if any navigation flag is active
-      if ((window as any).NAVIGATION_IN_PROGRESS || 
-          (window as any).TEMPORARILY_DISABLE_TABS || 
-          (window as any).FORCE_DISABLE_SCROLL_LOCK) {
+      const windowWithFlags = window as unknown as WindowWithFlags;
+      if (windowWithFlags.NAVIGATION_IN_PROGRESS || 
+          windowWithFlags.TEMPORARILY_DISABLE_TABS || 
+          windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
         console.log("🚫 Navigation in progress, disabling tab switching");
         if (isScrollLocked) {
           console.log("🔓 Force unlocking due to navigation");
@@ -411,7 +421,7 @@ export const Tabs = ({
         return;
       }
 
-      let newIndex = scrollDirection === "down"
+      const newIndex = scrollDirection === "down"
         ? Math.min(currentIndex + 1, tabs.length - 1)
         : Math.max(currentIndex - 1, 0);
 
@@ -427,7 +437,7 @@ export const Tabs = ({
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [isMobile, isMobileInitialized, isScrollLocked, isInitialized, hasExitedUp, tabs, TAB_SWITCH_START, TAB_SWITCH_END]);
+  }, [isMobile, isMobileInitialized, isScrollLocked, isInitialized, hasExitedUp, tabs, TAB_SWITCH_START, TAB_SWITCH_END, scrollY]);
 
   // 🖱️ Wheel Handler - DESKTOP ONLY
   useEffect(() => {
@@ -436,9 +446,10 @@ export const Tabs = ({
     
     const handleWheel = (e: WheelEvent) => {
       // Enhanced navigation check
-      if ((window as any).NAVIGATION_IN_PROGRESS || 
-          (window as any).TEMPORARILY_DISABLE_TABS ||
-          (window as any).FORCE_DISABLE_SCROLL_LOCK) {
+      const windowWithFlags = window as unknown as WindowWithFlags;
+      if (windowWithFlags.NAVIGATION_IN_PROGRESS || 
+          windowWithFlags.TEMPORARILY_DISABLE_TABS ||
+          windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
         console.log("🚫 Wheel event blocked due to navigation");
         if (isScrollLocked) {
           console.log("🔓 Force unlocking due to navigation");
@@ -456,7 +467,7 @@ export const Tabs = ({
       if (now - lastScrollTime.current < scrollThrottle) return;
 
       const currentIndex = originalTabs.current.findIndex(tab => tab.value === tabs[0].value);
-      let newIndex = e.deltaY > 0
+      const newIndex = e.deltaY > 0
         ? Math.min(currentIndex + 1, tabs.length - 1)
         : Math.max(currentIndex - 1, 0);
 
@@ -482,8 +493,9 @@ export const Tabs = ({
 
     const handleScroll = (e: Event) => {
       // Don't prevent scroll during navigation
-      if ((window as any).NAVIGATION_IN_PROGRESS || 
-          (window as any).FORCE_DISABLE_SCROLL_LOCK) {
+      const windowWithFlags = window as unknown as WindowWithFlags;
+      if (windowWithFlags.NAVIGATION_IN_PROGRESS || 
+          windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
         return;
       }
       
@@ -493,7 +505,8 @@ export const Tabs = ({
       }
     };
 
-    if (isScrollLocked && !(window as any).FORCE_DISABLE_SCROLL_LOCK) {
+    const windowWithFlags = window as unknown as WindowWithFlags;
+    if (isScrollLocked && !windowWithFlags.FORCE_DISABLE_SCROLL_LOCK) {
       document.addEventListener("wheel", handleWheel, { passive: false });
       document.addEventListener("scroll", handleScroll, { passive: false });
       document.addEventListener("touchmove", handleScroll, { passive: false });
@@ -567,9 +580,9 @@ export const FadeInDiv = React.forwardRef<HTMLDivElement, {
   key?: string;
   tabs: Tab[];
   active: Tab;
-  tabContentRefs: React.MutableRefObject<(React.RefObject<HTMLDivElement | null>)[]>;
+  tabContentRefs: React.MutableRefObject<React.RefObject<HTMLDivElement | null>[]>;
   isMobile?: boolean;
-}>(({ className, tabs, active, tabContentRefs, isMobile }, ref) => {
+}>(({ className, tabs, tabContentRefs, isMobile }, ref) => {
   const isActive = (tab: Tab) => tab.value === tabs[0].value;
 
   return (

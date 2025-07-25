@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
 
+declare global {
+  interface Window {
+    TEMPORARILY_DISABLE_TABS?: boolean;
+    NAVIGATION_IN_PROGRESS?: boolean;
+    FORCE_DISABLE_SCROLL_LOCK?: boolean;
+  }
+}
+
 export function NavbarDemo() {
   const navItems = [
     {
@@ -28,15 +36,16 @@ export function NavbarDemo() {
     },
   ];
 
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleContactNavigation = () => {
     console.log("🎯 CONTACT NAVIGATION - FORCE UNLOCK ALL RESTRICTIONS");
     
     // 1. IMMEDIATE FLAGS - More comprehensive
-    (window as any).TEMPORARILY_DISABLE_TABS = true;
-    (window as any).NAVIGATION_IN_PROGRESS = true;
-    (window as any).FORCE_DISABLE_SCROLL_LOCK = true;
+    window.TEMPORARILY_DISABLE_TABS = true;
+    window.NAVIGATION_IN_PROGRESS = true;
+    window.FORCE_DISABLE_SCROLL_LOCK = true;
     
     // 2. FORCE UNLOCK ALL SCROLL RESTRICTIONS - NUCLEAR APPROACH
     document.body.style.position = '';
@@ -55,10 +64,9 @@ export function NavbarDemo() {
     
     // 4. DISABLE ALL SCROLL EVENT LISTENERS TEMPORARILY
     const originalAddEventListener = document.addEventListener;
-    const originalRemoveEventListener = document.removeEventListener;
     
     // Temporarily override addEventListener to prevent new scroll listeners
-    document.addEventListener = function(type: string, listener: any, options?: any) {
+    document.addEventListener = function(type: string, listener: EventListener, options?: boolean | AddEventListenerOptions) {
       if (type === 'scroll' || type === 'wheel' || type === 'touchmove') {
         console.log("🚫 Blocking scroll listener during navigation");
         return;
@@ -92,18 +100,19 @@ export function NavbarDemo() {
     // 6. Restore addEventListener after navigation
     setTimeout(() => {
       document.addEventListener = originalAddEventListener;
-      (window as any).NAVIGATION_IN_PROGRESS = false;
-      (window as any).FORCE_DISABLE_SCROLL_LOCK = false;
+      window.NAVIGATION_IN_PROGRESS = false;
+      window.FORCE_DISABLE_SCROLL_LOCK = false;
       console.log("🎯 Navigation completed, addEventListener restored");
     }, 3000);
     
     // 7. Extended disable period for tabs
     setTimeout(() => {
-      (window as any).TEMPORARILY_DISABLE_TABS = false;
+      window.TEMPORARILY_DISABLE_TABS = false;
       console.log("🎯 Tab system re-enabled");
     }, 5000);
   };
   
+
 
   return (
     <div className="relative w-full">
@@ -122,6 +131,7 @@ export function NavbarDemo() {
           </div>
         </NavBody>
 
+
         {/* Mobile Navigation */}
         <MobileNav>
           <MobileNavHeader>
@@ -131,6 +141,7 @@ export function NavbarDemo() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             />
           </MobileNavHeader>
+
 
           <MobileNavMenu
             isOpen={isMobileMenuOpen}
