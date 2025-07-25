@@ -1,5 +1,5 @@
 "use client"
-import { BackgroundBeams } from '@/components/ui/background-beams'
+import { BackgroundBeams} from '@/components/ui/background-beams'
 import { FlipWords } from "@/components/ui/flip-words";
 import React from 'react'
 
