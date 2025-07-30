@@ -64,7 +64,8 @@ const handleContactNavigation = () => {
     const contactElement = document.getElementById('contact');
     if (contactElement) {
       requestAnimationFrame(() => {
-        window.scrollTo({ top: contactElement.offsetTop, behavior: 'smooth' });
+        const offset= 100
+        window.scrollTo({ top: contactElement.offsetTop - offset, behavior: 'smooth' });
         contactElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
@@ -179,6 +180,7 @@ export function TabsDemo() {
       description: "Bring Your Brand To Life Through Compelling Visuals And High-Impact Storytelling.",
       subtitle: "From Logo Design To Ad Campaigns And Promotional Materials, Our Creative Services Help You Stand Out And Stay Remembered.",
       buttonText: "Book a Creative Consult",
+      images: ["/1creatives.jpg", "/2creatives.jpg", "/3creatives.jpg", "/4creative.jpeg"],
       services: [
         { text: "Brand Identity Design" },
         { text: "Logo Design" },
@@ -193,7 +195,7 @@ export function TabsDemo() {
       description: "Accelerate Your Digital Growth With Our Performance-Driven Marketing Strategies.",
       subtitle: "From SEO To Social Media, Our Digital Marketing Services Are Designed To Boost Your Online Presence And Drive Results.",
       buttonText: "Boost Your Reach",
-      images: ["/IITT.jpg", "/earphone.jpg", "/3DDeck.jpg", "/menu.jpg"],
+      images: ["/4digital.webp", "/2digital.webp", "/3digital.jpg", "/1digital.jpg" ],
       services: [
         { text: "Social Media Marketing" },
         { text: "Google Ads & PPC" },
@@ -208,6 +210,7 @@ export function TabsDemo() {
       description: "Build Strong Digital Foundations With Our Web Development And Digital Solutions Services.",
       subtitle: "From Custom Websites To E-Commerce Solutions, We Create Digital Experiences That Drive Business Growth.",
       buttonText: "Start Your Website",
+      images: ["/1webdev.webp",  "/4webdev.webp", "/3webdev.webp", "/2webdev.webp"],
       services: [
         { text: "Website Development" },
         { text: "E-Commerce Solutions" },
@@ -222,7 +225,7 @@ export function TabsDemo() {
       description: "Bring Your Stories To Print With Our Quality Print Solutions And Publishing Services.",
       subtitle: "From Magazines To Books, We Offer Complete Print Solutions With High-Quality Output And Professional Results.",
       buttonText: "Request A Quote",
-      images: ["/brochure.jpg", "/foodPoster.jpg", "/badge.webp", "/mockDiary.webp"],
+      images: ["/1print.png", "/2print.jpeg", "/3print.jpg", "/4print.jpg"],
       services: [
         { text: "Magazine Publishing" },
         { text: "Book Publishing" },
@@ -237,7 +240,7 @@ export function TabsDemo() {
       description: "Create Unforgettable Events Experiences With Our End-To-End Event Management Solutions.",
       subtitle: "From Corporate Events To Weddings, We Handle Everything From Planning To Execution And Post-Event Management.",
       buttonText: "Plan Your Event",
-      images: ["/event1.webp", "/event2.webp", "/event3.webp", "/event4.webp"],
+      images: ["/1event.jpg", "/2event.JPG", "/3event.jpg", "/4event.jpg"],
       services: [
         { text: "Corporate Events" },
         { text: "Product Launches" },
